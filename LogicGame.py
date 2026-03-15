@@ -1,94 +1,110 @@
 import tkinter as tk
-import random
 
-# Game settings
-WINDOW_WIDTH = 500
-WINDOW_HEIGHT = 400
-BALL_SIZE = 20
-PADDLE_WIDTH = 80
-PADDLE_HEIGHT = 10
-BALL_SPEED = 3
+# ------------------------------
+# Logic Gate Base Class
+# ------------------------------
+class LogicGate:
+    def __init__(self, canvas, x, y, gate_type):
+        self.canvas = canvas
+        self.x = x
+        self.y = y
+        self.gate_type = gate_type
+        self.width = 80
+        self.height = 50
+        self.inputs = [0, 0] if gate_type != "NOT" else [0]
+        self.output = 0
+        self.drag_data = {"x": 0, "y": 0}
 
-class CatchTheBallGame:
+        # Draw gate rectangle
+        self.rect = self.canvas.create_rectangle(
+            x, y, x + self.width, y + self.height, fill="lightblue"
+        )
+        self.text = self.canvas.create_text(
+            x + self.width / 2, y + self.height / 2, text=gate_type, font=("Arial", 12, "bold")
+        )
+
+        # Bind mouse events for dragging
+        for item in (self.rect, self.text):
+            self.canvas.tag_bind(item, "<ButtonPress-1>", self.on_start)
+            self.canvas.tag_bind(item, "<B1-Motion>", self.on_drag)
+            self.canvas.tag_bind(item, "<ButtonRelease-1>", self.on_drop)
+
+    def on_start(self, event):
+        """Start dragging"""
+        self.drag_data["x"] = event.x
+        self.drag_data["y"] = event.y
+
+    def on_drag(self, event):
+        """While dragging"""
+        dx = event.x - self.drag_data["x"]
+        dy = event.y - self.drag_data["y"]
+        self.canvas.move(self.rect, dx, dy)
+        self.canvas.move(self.text, dx, dy)
+        self.drag_data["x"] = event.x
+        self.drag_data["y"] = event.y
+
+    def on_drop(self, event):
+        """Drop gate"""
+        coords = self.canvas.coords(self.rect)
+        self.x, self.y = coords[0], coords[1]
+
+    def evaluate(self):
+        """Evaluate gate output based on inputs"""
+        if self.gate_type == "AND":
+            self.output = int(all(self.inputs))
+        elif self.gate_type == "OR":
+            self.output = int(any(self.inputs))
+        elif self.gate_type == "NOT":
+            self.output = int(not self.inputs[0])
+        return self.output
+
+# ------------------------------
+# Main Application
+# ------------------------------
+class LogicGateGame:
     def __init__(self, root):
         self.root = root
-        self.root.title("Catch the Ball Game")
+        self.root.title("Logic Gate Game - Tkinter")
+        self.canvas = tk.Canvas(root, width=800, height=600, bg="white")
+        self.canvas.pack(fill="both", expand=True)
 
-        # Create canvas
-        self.canvas = tk.Canvas(root, width=WINDOW_WIDTH, height=WINDOW_HEIGHT, bg="black")
-        self.canvas.pack()
+        # Create gates
+        self.gates = [
+            LogicGate(self.canvas, 50, 50, "AND"),
+            LogicGate(self.canvas, 200, 50, "OR"),
+            LogicGate(self.canvas, 350, 50, "NOT")
+        ]
 
-        # Create paddle
-        self.paddle = self.canvas.create_rectangle(
-            (WINDOW_WIDTH - PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 30,
-            (WINDOW_WIDTH + PADDLE_WIDTH) / 2, WINDOW_HEIGHT - 30 + PADDLE_HEIGHT,
-            fill="white"
-        )
+        # Input toggle buttons
+        self.input_vars = [tk.IntVar(value=0), tk.IntVar(value=0)]
+        tk.Checkbutton(root, text="Input A", variable=self.input_vars[0], command=self.update_outputs).pack(side="left")
+        tk.Checkbutton(root, text="Input B", variable=self.input_vars[1], command=self.update_outputs).pack(side="left")
 
-        # Create ball
-        self.ball = self.canvas.create_oval(
-            random.randint(0, WINDOW_WIDTH - BALL_SIZE), 0,
-            random.randint(0, WINDOW_WIDTH - BALL_SIZE) + BALL_SIZE, BALL_SIZE,
-            fill="red"
-        )
+        # Output label
+        self.output_label = tk.Label(root, text="Outputs: ", font=("Arial", 12))
+        self.output_label.pack(side="left", padx=20)
 
-        # Game variables
-        self.ball_dx = BALL_SPEED
-        self.ball_dy = BALL_SPEED
-        self.score = 0
-        self.game_over = False
+        self.update_outputs()
 
-        # Score display
-        self.score_text = self.canvas.create_text(50, 20, text="Score: 0", fill="white", font=("Arial", 14))
+    def update_outputs(self):
+        """Update gate outputs based on inputs"""
+        a = self.input_vars[0].get()
+        b = self.input_vars[1].get()
 
-        # Bind controls
-        self.root.bind("<Left>", self.move_left)
-        self.root.bind("<Right>", self.move_right)
+        for gate in self.gates:
+            if gate.gate_type == "NOT":
+                gate.inputs = [a]
+            else:
+                gate.inputs = [a, b]
+            gate.evaluate()
 
-        # Start game loop
-        self.update_game()
+        outputs = ", ".join([f"{g.gate_type}: {g.output}" for g in self.gates])
+        self.output_label.config(text=f"Outputs: {outputs}")
 
-    def move_left(self, event):
-        if not self.game_over:
-            self.canvas.move(self.paddle, -20, 0)
-
-    def move_right(self, event):
-        if not self.game_over:
-            self.canvas.move(self.paddle, 20, 0)
-
-    def update_game(self):
-        if not self.game_over:
-            # Move ball
-            self.canvas.move(self.ball, self.ball_dx, self.ball_dy)
-            ball_coords = self.canvas.coords(self.ball)
-            paddle_coords = self.canvas.coords(self.paddle)
-
-            # Bounce off walls
-            if ball_coords[0] <= 0 or ball_coords[2] >= WINDOW_WIDTH:
-                self.ball_dx = -self.ball_dx
-            if ball_coords[1] <= 0:
-                self.ball_dy = -self.ball_dy
-
-            # Check collision with paddle
-            if (paddle_coords[0] < ball_coords[2] and
-                paddle_coords[2] > ball_coords[0] and
-                paddle_coords[1] < ball_coords[3] and
-                paddle_coords[3] > ball_coords[1]):
-                self.ball_dy = -self.ball_dy
-                self.score += 1
-                self.canvas.itemconfig(self.score_text, text=f"Score: {self.score}")
-
-            # Check if ball hits bottom
-            if ball_coords[3] >= WINDOW_HEIGHT:
-                self.game_over = True
-                self.canvas.create_text(WINDOW_WIDTH/2, WINDOW_HEIGHT/2,
-                                        text="GAME OVER", fill="yellow", font=("Arial", 24))
-
-            # Continue loop
-            self.root.after(20, self.update_game)
-
-# Run the game
+# ------------------------------
+# Run the Game
+# ------------------------------
 if __name__ == "__main__":
     root = tk.Tk()
-    game = CatchTheBallGame(root)
+    app = LogicGateGame(root)
     root.mainloop()
