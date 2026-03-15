@@ -1,0 +1,21 @@
+{
+   "version": "0.2.0",
+   "configurations": [
+    
+    
+       {
+           "name": "Python: Guess Game",
+           "type": "debugpy",
+           "request": "launch",
+           "program": "${workspaceFolder}/GuessGame.py",
+           "console": "integratedTerminal"
+       },
+         {
+              "name": "Python: Current File",
+              "type": "debugpy",
+              "request": "launch",
+              "program": "${file}",
+              "console": "integratedTerminal"
+         }
+   ]
+}
