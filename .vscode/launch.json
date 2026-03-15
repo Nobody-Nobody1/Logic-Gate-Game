@@ -4,10 +4,10 @@
     
     
        {
-           "name": "Python: Guess Game",
+           "name": "Python: Logic Game",
            "type": "debugpy",
            "request": "launch",
-           "program": "${workspaceFolder}/GuessGame.py",
+           "program": "${workspaceFolder}/LogicGame.py",
            "console": "integratedTerminal"
        },
          {
