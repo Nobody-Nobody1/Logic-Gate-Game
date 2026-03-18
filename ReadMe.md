@@ -4,3 +4,5 @@
 
 - pip install pygame
 - if doesn't work use, python -m pip install pygame-ce
+
+- navigate to ActualGame/dist/LogicGameTkinter.exe for exe file

@@ -7,14 +7,14 @@
            "name": "Python: Logic Game Pygame",
            "type": "debugpy",
            "request": "launch",
-           "program": "${workspaceFolder}/LogicGamePygame.py",
+           "program": "${workspaceFolder}LogicGamePygame.py",
            "console": "integratedTerminal"
        },
        {
            "name": "Python: Logic Game Tkinter",
            "type": "debugpy",
            "request": "launch",
-           "program": "${workspaceFolder}/LogicGameTkinter.py",
+           "program": "${workspaceFolder}/ActualGame/LogicGameTkinter.py",
            "console": "integratedTerminal"
        },
          {

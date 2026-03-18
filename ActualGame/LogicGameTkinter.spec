@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['LogicgamePygame.py'],
+    ['LogicGameTkinter.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='LogicgamePygame',
+    name='LogicGameTkinter',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
